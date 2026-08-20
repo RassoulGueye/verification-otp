@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Vérification OTP</title>
+
+    <style>
+
+        /* =========================
+           RESET
+        ========================= */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100%;
+            min-height: 100%;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #030712;
+            color: white;
+            overflow: hidden;
+        }
+
+
+        /* =========================
+           BACKGROUND
+        ========================= */
+
+        .background {
+            position: fixed;
+            inset: 0;
+
+            background:
+                radial-gradient(
+                    circle at 50% 50%,
+                    #071b35 0%,
+                    #030712 45%,
+                    #01030a 100%
+                );
+
+            overflow: hidden;
+            z-index: -1;
+        }
+
+
+        .glow {
+            position: absolute;
+
+            width: 350px;
+            height: 350px;
+
+            border-radius: 50%;
+
+            filter: blur(100px);
+
+            opacity: 0.25;
+        }
+
+
+        .glow-1 {
+            background: #0066ff;
+
+            top: -120px;
+            left: -100px;
+        }
+
+
+        .glow-2 {
+            background: #00c8ff;
+
+            bottom: -150px;
+            right: -100px;
+        }
+
+
+        /* =========================
+           CONTAINER
+        ========================= */
+
+        .container {
+            width: 100%;
+            min-height: 100vh;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            padding: 20px;
+        }
+
+
+        /* =========================
+           CARD
+        ========================= */
+
+        .otp-card {
+            width: 100%;
+            max-width: 430px;
+
+            padding: 45px 35px;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(14, 25, 45, 0.95),
+                    rgba(3, 9, 20, 0.96)
+                );
+
+            border: 1px solid rgba(0, 153, 255, 0.25);
+
+            border-radius: 25px;
+
+            text-align: center;
+
+            box-shadow:
+                0 0 40px rgba(0, 119, 255, 0.12),
+                inset 0 0 30px rgba(0, 100, 255, 0.03);
+
+            backdrop-filter: blur(20px);
+
+            animation: cardAppear 0.7s ease;
+        }
+
+
+        /* =========================
+           ICON
+        ========================= */
+
+        .icon-container {
+            display: flex;
+            justify-content: center;
+
+            margin-bottom: 20px;
+        }
+
+
+        .lock-icon {
+            width: 70px;
+            height: 70px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 20px;
+
+            background: rgba(0, 119, 255, 0.1);
+
+            border: 1px solid rgba(0, 153, 255, 0.35);
+
+            font-size: 32px;
+
+            box-shadow:
+                0 0 25px rgba(0, 132, 255, 0.25);
+
+            animation: iconPulse 2s infinite;
+        }
+
+
+        /* =========================
+           TITRE
+        ========================= */
+
+        h1 {
+            font-size: 30px;
+
+            font-weight: 700;
+
+            margin-bottom: 12px;
+        }
+
+
+        .description {
+            color: #8d9bb3;
+
+            font-size: 14px;
+
+            line-height: 1.7;
+
+            margin-bottom: 32px;
+        }
+
+
+        /* =========================
+           OTP
+        ========================= */
+
+        .otp-container {
+            display: flex;
+
+            justify-content: center;
+
+            gap: 12px;
+
+            margin-bottom: 25px;
+        }
+
+
+        .otp-input {
+            width: 65px;
+            height: 70px;
+
+            border-radius: 15px;
+
+            border: 1px solid #263b5b;
+
+            outline: none;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    #0d1a2c,
+                    #07101e
+                );
+
+            color: white;
+
+            font-size: 28px;
+
+            font-weight: 700;
+
+            text-align: center;
+
+            transition:
+                border 0.25s ease,
+                box-shadow 0.25s ease,
+                transform 0.2s ease;
+        }
+
+
+        .otp-input:focus {
+            border-color: #009dff;
+
+            box-shadow:
+                0 0 10px rgba(0, 157, 255, 0.4),
+                0 0 25px rgba(0, 157, 255, 0.18);
+
+            transform: translateY(-3px);
+        }
+
+
+        /* =========================
+           MESSAGE
+        ========================= */
+
+        .message {
+            min-height: 20px;
+
+            margin-bottom: 15px;
+
+            font-size: 14px;
+
+            font-weight: 600;
+        }
+
+
+        .message.success {
+            color: #00e676;
+        }
+
+
+        .message.error {
+            color: #ff4757;
+        }
+
+
+        /* =========================
+           BOUTON
+        ========================= */
+
+        #verifyBtn {
+            width: 100%;
+
+            height: 55px;
+
+            border: none;
+
+            border-radius: 14px;
+
+            cursor: pointer;
+
+            color: white;
+
+            font-size: 15px;
+
+            font-weight: 700;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #0066ff,
+                    #00aaff
+                );
+
+            box-shadow:
+                0 8px 25px rgba(0, 119, 255, 0.25);
+
+            transition: 0.2s ease;
+        }
+
+
+        #verifyBtn:hover {
+            transform: translateY(-2px);
+
+            box-shadow:
+                0 12px 35px rgba(0, 119, 255, 0.4);
+        }
+
+
+        #verifyBtn:active {
+            transform: scale(0.98);
+        }
+
+
+        /* =========================
+           RENVOYER
+        ========================= */
+
+        .resend {
+            margin-top: 25px;
+
+            font-size: 13px;
+
+            color: #718099;
+        }
+
+
+        #resendBtn {
+            border: none;
+
+            background: none;
+
+            color: #00aaff;
+
+            cursor: pointer;
+
+            font-weight: 700;
+
+            font-size: 13px;
+        }
+
+
+        #resendBtn:hover {
+            text-decoration: underline;
+        }
+
+
+        /* =========================
+           TIMER
+        ========================= */
+
+        .timer {
+            margin-top: 12px;
+
+            color: #52627a;
+
+            font-size: 12px;
+        }
+
+
+        /* =========================
+           ANIMATIONS
+        ========================= */
+
+        @keyframes cardAppear {
+
+            from {
+                opacity: 0;
+
+                transform:
+                    translateY(30px)
+                    scale(0.96);
+            }
+
+            to {
+                opacity: 1;
+
+                transform:
+                    translateY(0)
+                    scale(1);
+            }
+        }
+
+
+        @keyframes iconPulse {
+
+            0%,
+            100% {
+                box-shadow:
+                    0 0 20px rgba(0, 132, 255, 0.15);
+            }
+
+            50% {
+                box-shadow:
+                    0 0 35px rgba(0, 132, 255, 0.4);
+            }
+        }
+
+
+        /* =========================
+           ERREUR
+        ========================= */
+
+        .shake {
+            animation: shake 0.4s ease;
+        }
+
+
+        @keyframes shake {
+
+            0% {
+                transform: translateX(0);
+            }
+
+            20% {
+                transform: translateX(-8px);
+            }
+
+            40% {
+                transform: translateX(8px);
+            }
+
+            60% {
+                transform: translateX(-6px);
+            }
+
+            80% {
+                transform: translateX(6px);
+            }
+
+            100% {
+                transform: translateX(0);
+            }
+        }
+
+
+        /* =========================
+           SUCCÈS
+        ========================= */
+
+        .success-input {
+            border-color: #00e676 !important;
+
+            box-shadow:
+                0 0 15px rgba(0, 230, 118, 0.35) !important;
+        }
+
+
+        /* =========================
+           MOBILE
+        ========================= */
+
+        @media (max-width: 500px) {
+
+            .otp-card {
+                padding: 35px 20px;
+
+                border-radius: 20px;
+            }
+
+            h1 {
+                font-size: 26px;
+            }
+
+            .otp-container {
+                gap: 8px;
+            }
+
+            .otp-input {
+                width: 58px;
+                height: 62px;
+
+                font-size: 25px;
+            }
+        }
+
+
+        @media (max-width: 360px) {
+
+            .otp-input {
+                width: 52px;
+                height: 58px;
+            }
+
+            .otp-container {
+                gap: 6px;
+            }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- =========================
+         BACKGROUND
+    ========================== -->
+
+    <div class="background">
+
+        <div class="glow glow-1"></div>
+
+        <div class="glow glow-2"></div>
+
+    </div>
+
+
+    <!-- =========================
+         CONTENU
+    ========================== -->
+
+    <main class="container">
+
+        <div class="otp-card">
+
+
+            <!-- ICÔNE -->
+
+            <div class="icon-container">
+
+                <div class="lock-icon">
+                    🔐
+                </div>
+
+            </div>
+
+
+            <!-- TITRE -->
+
+            <h1>
+                Vérification
+            </h1>
+
+
+            <p class="description">
+
+                Entrez le code à 4 chiffres envoyé
+                <br>
+
+                à votre numéro de téléphone.
+
+            </p>
+
+
+            <!-- =========================
+                 CHAMPS OTP
+            ========================== -->
+
+            <div class="otp-container">
+
+
+                <input
+                    type="text"
+                    class="otp-input"
+                    maxlength="1"
+                    inputmode="numeric"
+                    autocomplete="one-time-code"
+                >
+
+
+                <input
+                    type="text"
+                    class="otp-input"
+                    maxlength="1"
+                    inputmode="numeric"
+                >
+
+
+                <input
+                    type="text"
+                    class="otp-input"
+                    maxlength="1"
+                    inputmode="numeric"
+                >
+
+
+                <input
+                    type="text"
+                    class="otp-input"
+                    maxlength="1"
+                    inputmode="numeric"
+                >
+
+
+            </div>
+
+
+            <!-- MESSAGE -->
+
+            <p
+                id="message"
+                class="message"
+            ></p>
+
+
+            <!-- BOUTON -->
+
+            <button id="verifyBtn">
+
+                Vérifier le code
+
+            </button>
+
+
+            <!-- RENVOYER -->
+
+            <div class="resend">
+
+                Vous n'avez pas reçu le code ?
+
+                <button id="resendBtn">
+
+                    Renvoyer
+
+                </button>
+
+            </div>
+
+
+            <!-- COMPTEUR -->
+
+            <div
+                id="timer"
+                class="timer"
+            >
+
+                Renvoyer dans
+
+                <span>30</span>s
+
+            </div>
+
+
+        </div>
+
+    </main>
+
+
+    <!-- =========================
+         JAVASCRIPT
+    ========================== -->
+
+    <script>
+
+
+        /* =========================
+           ÉLÉMENTS
+        ========================= */
+
+        const inputs =
+            document.querySelectorAll(".otp-input");
+
+        const verifyBtn =
+            document.getElementById("verifyBtn");
+
+        const resendBtn =
+            document.getElementById("resendBtn");
+
+        const message =
+            document.getElementById("message");
+
+        const timerElement =
+            document.querySelector("#timer span");
+
+        const card =
+            document.querySelector(".otp-card");
+
+
+        /* =========================
+           CODE CORRECT
+        ========================= */
+
+        const correctCode = "1234";
+
+
+        /* =========================
+           PREMIER CHAMP
+        ========================= */
+
+        window.addEventListener("load", () => {
+
+            inputs[0].focus();
+
+        });
+
+
+        /* =========================
+           SAISIE OTP
+        ========================= */
+
+        inputs.forEach((input, index) => {
+
+
+            input.addEventListener(
+                "input",
+                () => {
+
+                    input.value =
+                        input.value.replace(
+                            /[^0-9]/g,
+                            ""
+                        );
+
+
+                    if (
+                        input.value &&
+                        index < inputs.length - 1
+                    ) {
+
+                        inputs[index + 1].focus();
+
+                    }
+
+                }
+            );
+
+
+            /* =========================
+               BACKSPACE
+            ========================== */
+
+            input.addEventListener(
+                "keydown",
+                (event) => {
+
+                    if (
+                        event.key === "Backspace" &&
+                        input.value === "" &&
+                        index > 0
+                    ) {
+
+                        inputs[index - 1].focus();
+
+                    }
+
+                }
+            );
+
+
+            /* =========================
+               COLLAGE
+            ========================== */
+
+            input.addEventListener(
+                "paste",
+                (event) => {
+
+                    event.preventDefault();
+
+
+                    const pastedData =
+                        event.clipboardData
+                            .getData("text")
+                            .replace(
+                                /[^0-9]/g,
+                                ""
+                            )
+                            .slice(0, 4);
+
+
+                    pastedData
+                        .split("")
+                        .forEach(
+                            (number, i) => {
+
+                                if (inputs[i]) {
+
+                                    inputs[i].value =
+                                        number;
+
+                                }
+
+                            }
+                        );
+
+
+                    if (
+                        pastedData.length === 4
+                    ) {
+
+                        inputs[3].focus();
+
+                    }
+
+                }
+            );
+
+        });
+
+
+        /* =========================
+           RÉCUPÉRER LE CODE
+        ========================== */
+
+        function getCode() {
+
+            let code = "";
+
+            inputs.forEach(
+                (input) => {
+
+                    code += input.value;
+
+                }
+            );
+
+            return code;
+
+        }
+
+
+        /* =========================
+           MESSAGE
+        ========================== */
+
+        function showMessage(
+            text,
+            type
+        ) {
+
+            message.textContent = text;
+
+            message.className =
+                "message " + type;
+
+        }
+
+
+        /* =========================
+           VÉRIFICATION
+        ========================== */
+
+        verifyBtn.addEventListener(
+            "click",
+            () => {
+
+                const code =
+                    getCode();
+
+
+                /* Code incomplet */
+
+                if (code.length !== 4) {
+
+                    showMessage(
+                        "Veuillez entrer les 4 chiffres.",
+                        "error"
+                    );
+
+
+                    card.classList.remove(
+                        "shake"
+                    );
+
+                    void card.offsetWidth;
+
+                    card.classList.add(
+                        "shake"
+                    );
+
+                    return;
+
+                }
+
+
+                /* Code correct */
+
+                if (
+                    code === correctCode
+                ) {
+
+                    showMessage(
+                        "✓ Code vérifié avec succès !",
+                        "success"
+                    );
+
+
+                    inputs.forEach(
+                        (input) => {
+
+                            input.classList.add(
+                                "success-input"
+                            );
+
+                        }
+                    );
+
+
+                    verifyBtn.textContent =
+                        "✓ Vérification réussie";
+
+
+                    verifyBtn.disabled =
+                        true;
+
+
+                    verifyBtn.style.opacity =
+                        "0.7";
+
+
+                }
+
+
+                /* Code incorrect */
+
+                else {
+
+                    showMessage(
+                        "✕ Code incorrect. Réessayez.",
+                        "error"
+                    );
+
+
+                    card.classList.remove(
+                        "shake"
+                    );
+
+                    void card.offsetWidth;
+
+                    card.classList.add(
+                        "shake"
+                    );
+
+
+                    setTimeout(
+                        () => {
+
+                            inputs.forEach(
+                                (input) => {
+
+                                    input.value = "";
+
+                                }
+                            );
+
+
+                            inputs[0].focus();
+
+                        },
+                        500
+                    );
+
+                }
+
+            }
+        );
+
+
+        /* =========================
+           TOUCHE ENTRÉE
+        ========================== */
+
+        document.addEventListener(
+            "keydown",
+            (event) => {
+
+                if (
+                    event.key === "Enter"
+                ) {
+
+                    verifyBtn.click();
+
+                }
+
+            }
+        );
+
+
+        /* =========================
+           COMPTEUR
+        ========================== */
+
+        let timeLeft = 30;
+
+        let timer;
+
+
+        function startTimer() {
+
+            timeLeft = 30;
+
+            resendBtn.disabled =
+                true;
+
+            resendBtn.style.opacity =
+                "0.5";
+
+            timerElement.textContent =
+                timeLeft;
+
+
+            timer =
+                setInterval(
+                    () => {
+
+                        timeLeft--;
+
+                        timerElement.textContent =
+                            timeLeft;
+
+
+                        if (
+                            timeLeft <= 0
+                        ) {
+
+                            clearInterval(
+                                timer
+                            );
+
+
+                            resendBtn.disabled =
+                                false;
+
+
+                            resendBtn.style.opacity =
+                                "1";
+
+
+                            timerElement.textContent =
+                                "0";
+
+                        }
+
+                    },
+                    1000
+                );
+
+        }
+
+
+        startTimer();
+
+
+        /* =========================
+           RENVOYER
+        ========================== */
+
+        resendBtn.addEventListener(
+            "click",
+            () => {
+
+                if (
+                    resendBtn.disabled
+                ) {
+
+                    return;
+
+                }
+
+
+                showMessage(
+                    "✓ Un nouveau code a été envoyé.",
+                    "success"
+                );
+
+
+                inputs.forEach(
+                    (input) => {
+
+                        input.value = "";
+
+                        input.classList.remove(
+                            "success-input"
+                        );
+
+                    }
+                );
+
+
+                inputs[0].focus();
+
+
+                verifyBtn.disabled =
+                    false;
+
+
+                verifyBtn.style.opacity =
+                    "1";
+
+
+                verifyBtn.textContent =
+                    "Vérifier le code";
+
+
+                clearInterval(timer);
+
+                startTimer();
+
+            }
+        );
+
+    </script>
+
+</body>
+
+</html>
